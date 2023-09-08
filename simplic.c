@@ -26,6 +26,6 @@ int main(int argc, char* argv[])
     // unimplemented
 
     // close file as a good measure
-    closef(sourcefile);
+    fclose(sourcefile);
     return 0;
 }
