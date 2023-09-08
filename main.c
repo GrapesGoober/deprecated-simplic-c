@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include <utils\simplic-node.h>
+
 int main(int argc, char* argv[])
 {
     // read cli arguments to get the filepath
@@ -22,6 +24,7 @@ int main(int argc, char* argv[])
     // start parsing the file
     // unimplemented
 
+        fprintf(stderr, "test error");
     // write to hex file
     // unimplemented
 
