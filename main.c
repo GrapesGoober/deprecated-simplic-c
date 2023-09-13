@@ -1,5 +1,11 @@
+// Simplic Compiler 2022, Nachat Kaewmeesang
+// main.c file is the entry point for the compiler, and a good starting point to read how this works.
+// This file handles cli arguments, file reading & writing, and various function calls to compile the code.
+
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "simplic/sasm.h" // for the assembler
 
 int main(int argc, char* argv[]) {
     
