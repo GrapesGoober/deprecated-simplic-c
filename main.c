@@ -1,6 +1,5 @@
 #include <stdio.h>
-
-#include "utils\simplic-node.h"
+#include <stdlib.h>
 
 int main(int argc, char* argv[]) {
     
