@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "simplic-node.h"
-
 Node* allocNode(void* data, size_t dataSize) {
 
     // Try to alloc for a new node
