@@ -1,5 +1,5 @@
 // Simplic Compiler 2022, Nachat Kaewmeesang
-// aofs-assenbler.h is the header file for the simplic assembler, which converts 
+// aofs-assembler.h is the header file for the simplic assembler, which converts 
 // simplic assembly instructions (in string) into binary code (in uint16_t). 
 // All functions of simplic assembler is prefixed with aofs_ for clarity
 #include <stdint.h>
