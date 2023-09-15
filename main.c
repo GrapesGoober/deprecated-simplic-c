@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "simplic/sasm.h" // for the assembler
+#include "simplic/aofs-assembler.h" // for the assembler
 
 int main(int argc, char* argv[]) {
     
