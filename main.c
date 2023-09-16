@@ -11,11 +11,11 @@ int main(int argc, char* argv[]) {
     
     // read cli arguments to get the filepath
     // cli should look like      smplc.exe 'file-to-compile'
-    if (argc != 2) {
-        // filepath argument not given
-        fprintf(stderr, "Requires 1 argument: filepath");
-        exit(EXIT_FAILURE);
-    }
+    // if (argc != 2) {
+    //     // filepath argument not given
+    //     fprintf(stderr, "Requires 1 argument: filepath");
+    //     exit(EXIT_FAILURE);
+    // }
 
     // start reading the file
     FILE* sourcefile;
@@ -27,6 +27,11 @@ int main(int argc, char* argv[]) {
 
     // start parsing the file
     // unimplemented
+    uint16_t bincode;
+    char *my_asm = argv[2];
+    aofs_HEX_tobinary(my_asm, 16, &bincode);
+    printf("Result: %i\n", bincode);
+    printf("%s", g_aofs_error_msg);
 
     // write to hex file
     // unimplemented
