@@ -3,7 +3,7 @@
 // simplic assembly instructions (in string) into binary code (in uint16_t). 
 // All functions of simplic assembler is prefixed with sasm_ for clarity
 #include <stdio.h>
-#include "../sasm.h"
+#include "../aofs-assembler.h"
 
 uint16_t sasm_ANY_tobinary(char *asmLine);
 
