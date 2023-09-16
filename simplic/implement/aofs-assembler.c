@@ -16,11 +16,13 @@ void aof_asm_error(char *mnem, char *message){
 
 bool aof_HEX_tobinary(char *hexliteral, uint8_t size, uint16_t* bincode){
 
+    // just handle only 2 digits hex literal, for simplicity
     if (hexliteral[2] != '\0') {
         aof_asm_error(hexliteral, "Only support 2 digits hex literal, with no prefix");
         return false;
     }
 
+    // convert to int, while also handling invalid (bad hex) characters
     char *badhex;
     *bincode = (uint16_t)strtol(hexliteral, &badhex, 16);
     if (*badhex != '\0'){
@@ -28,8 +30,9 @@ bool aof_HEX_tobinary(char *hexliteral, uint8_t size, uint16_t* bincode){
         return false;
     }
 
+    // making sure that the input value is not too big
     if (*bincode > size) {
-        aof_asm_error(hexliteral, "Hex literal value too big.");
+        aof_asm_error(hexliteral, "Hex literal value too large.");
         return false;
     }
 

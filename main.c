@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     // unimplemented
     uint16_t bincode;
     char *my_asm = argv[2];
-    aof_HEX_tobinary(my_asm, 16, &bincode);
+    aof_HEX_tobinary(my_asm, 32, &bincode);
     printf("Result: %i\n", bincode);
     printf("%s", g_aofs_asm_errormsg);
 

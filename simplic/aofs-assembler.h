@@ -36,7 +36,7 @@ bool aof_ASM_tobinary(char *asmline, uint16_t *bincode);
  * Parses a hexadecimal literal to binary code (with size restriction)
  * Arguments:
  * - `char *hex_literal` Null terminated string containing 2 digits of hex.
- * - `uint8_t size` Size restriction, in number of bits.
+ * - `uint8_t size` Restrict how big the value of hex literal be. Will return false if too large.
  * - `uint16_t* bincode` The pointer to write the result binary code to.
  * 
  * Returns: `true` if success, `false` otherwise. 
