@@ -1,20 +1,48 @@
-// Simplic Compiler 2022, Nachat Kaewmeesang
-// sasm.c is the implementation file for the simplic assembler, which converts 
-// simplic assembly instructions (in string) into binary code (in uint16_t). 
-// All functions of simplic assembler is prefixed with sasm_ for clarity
+/**
+ * Simplic Compiler 2023, Nachat Kaewmeesang
+ * aofs-assembler.h is the implementation file for the simplic assembler. It contains parsers that
+ * converts simplic assembly instructions (in string) into binary code (in uint16_t). 
+ * All functions of simplic assembler is prefixed with aofs_ for clarity.
+*/
+
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "../aofs-assembler.h"
 
-uint16_t sasm_ANY_tobinary(char *asmLine);
+void aofs_asm_error(char *mnem, char *message){
+    snprintf(g_aofs_error_msg, 256, "Simplic Assembly Error: '%s'\n%s", mnem, message);
+}
 
-uint16_t sasm_HEX_tobinary(char *hexliteral, uint8_t size);
+bool aofs_HEX_tobinary(char *hexliteral, uint8_t size, uint16_t* bincode){
 
-uint16_t sasm_REG_tobinary(char *mnem);
+    if (hexliteral[2] != '\0') {
+        aofs_asm_error(hexliteral, "Only support 2 digits hex literal, with no prefix");
+        return false;
+    }
 
-uint16_t sasm_CND_tobinary(char *asmline);
+    char *badhex;
+    *bincode = (uint16_t)strtol(hexliteral, &badhex, 16);
+    if (*badhex != '\0'){
+        aofs_asm_error(hexliteral, "Invalid hex literal.");
+        return false;
+    }
 
-uint16_t sasm_MEM_tobinary(char *asmline);
+    if (*bincode > size) {
+        aofs_asm_error(hexliteral, "Hex literal value too big.");
+        return false;
+    }
 
-uint16_t sasm_SFT_tobinary(char *asmline);
+    return true;
+}
 
-uint16_t sasm_ALU_tobinary(char *asmline);
+bool aofs_CND_tobinary(char *asmline, uint16_t *bincode)
+{
+    // firstly, read the instruction
+    // CND Instructions handle MOV and INS instructions
+    if (strncmp(asmline, "MOV", 3) == 0) *bincode = 0x0000;
+    else if (strncmp(asmline, "INS", 3) == 0) *bincode = 0x1000;
+    else aofs_asm_error(asmline, "CND parser expected either a MOV or INS instruction");
+
+    return true;
+}
