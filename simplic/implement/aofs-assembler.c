@@ -10,15 +10,15 @@
 #include <string.h>
 #include "../aofs-assembler.h"
 
-void aof_asm_error(char *mnem, char *message){
-    snprintf(g_aofs_asm_errormsg, 256, "Simplic Assembly Error: '%s'\n%s", mnem, message);
+void aof_asm_fmterror(char *mnem, char *message){
+    snprintf(g_aofs_errormsg, 256, "Simplic Assembly Error: '%s'\n%s", mnem, message);
 }
 
 bool aof_HEX_tobinary(char *hexliteral, uint8_t size, uint16_t* bincode){
 
     // just handle only 2 digits hex literal, for simplicity
     if (hexliteral[2] != '\0') {
-        aof_asm_error(hexliteral, "Only support 2 digits hex literal, with no prefix");
+        aof_asm_fmterror(hexliteral, "Only support 2 digits hex literal, with no prefix");
         return false;
     }
 
@@ -26,13 +26,13 @@ bool aof_HEX_tobinary(char *hexliteral, uint8_t size, uint16_t* bincode){
     char *badhex;
     *bincode = (uint16_t)strtol(hexliteral, &badhex, 16);
     if (*badhex != '\0'){
-        aof_asm_error(hexliteral, "Invalid hex literal.");
+        aof_asm_fmterror(hexliteral, "Invalid hex literal.");
         return false;
     }
 
     // making sure that the input value is not too big
     if (*bincode > size) {
-        aof_asm_error(hexliteral, "Hex literal value too large.");
+        aof_asm_fmterror(hexliteral, "Hex literal value too large.");
         return false;
     }
 
@@ -42,10 +42,13 @@ bool aof_HEX_tobinary(char *hexliteral, uint8_t size, uint16_t* bincode){
 bool aof_CND_tobinary(char *asmline, uint16_t *bincode)
 {
     // firstly, read the instruction
-    // CND Instructions handle MOV and INS instructions
+    // CND Instructions handle MOV and CNA instructions
     if (strncmp(asmline, "MOV", 3) == 0) *bincode = 0x0000;
-    else if (strncmp(asmline, "INS", 3) == 0) *bincode = 0x1000;
-    else aof_asm_error(asmline, "CND parser expected either a MOV or INS instruction");
+    else if (strncmp(asmline, "CNA", 3) == 0) *bincode = 0x1000;
+    else {
+        aof_asm_fmterror(asmline, "CND parser expected either a MOV or INS instruction");
+        return false;
+    }
 
     return true;
 }

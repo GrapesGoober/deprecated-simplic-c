@@ -9,17 +9,17 @@
 #include <stdbool.h>
 
 /** 
- * A global variable that contains assembly syntax error messages.
+ * A global variable that contains assembly syntax error and output error messages.
 */
-char g_aofs_asm_errormsg[256];
+char g_aofs_errormsg[256];
 
 /** 
- * Writes an assembly error message to `g_aof_error_msg`.
+ * Formats an assembly error message to `g_aofs_errormsg`.
  * Arguments:
  * - `char *mnem` Null terminated string containing the mnemonic(s) of the problem.
  * - `char *message` Null terminated string containing the message.
 */
-void aof_asm_error(char *mnem, char *message);
+void aof_asm_fmterror(char *mnem, char *message);
 
 /** 
  * Parses an entire line of assembly instruction to binary. 
@@ -28,7 +28,7 @@ void aof_asm_error(char *mnem, char *message);
  * - `uint16_t* bincode` The pointer to write the result binary code to.
  * 
  * Returns: `true` if success, `false` otherwise. 
- * Note: if returns `false`, the error messages can be found in `g_aof_error_msg`.
+ * Note: if returns `false`, the error messages can be found in `g_aofs_errormsg`.
 */
 bool aof_ASM_tobinary(char *asmline, uint16_t *bincode);
 
@@ -43,7 +43,7 @@ bool aof_ASM_tobinary(char *asmline, uint16_t *bincode);
  * 
  * Notes:
  * - The caller must do appropriate shift left to place the binary code at the right location
- * - If returns `false`, caller should disregard `bincode` and check `g_aof_error_msg`.
+ * - If returns `false`, caller should disregard `bincode` and check `g_aofs_errormsg`.
 */
 bool aof_HEX_tobinary(char *hex_literal, uint8_t size, uint16_t *bincode);
 
@@ -57,7 +57,7 @@ bool aof_HEX_tobinary(char *hex_literal, uint8_t size, uint16_t *bincode);
  * 
  * Notes:
  * - The caller must do appropriate shift left to place the binary code at the right location
- * - If returns `false`, caller should disregard `bincode` and check `g_aof_error_msg`.
+ * - If returns `false`, caller should disregard `bincode` and check `g_aofs_errormsg`.
 */
 bool aof_REG_tobinary(char *reg_mnemonic, uint16_t* bincode);
 
@@ -67,11 +67,11 @@ bool aof_REG_tobinary(char *reg_mnemonic, uint16_t* bincode);
  * - `char *asmline` Null terminated string containing a line of assembly.
  * - `uint16_t* bincode` The pointer to write the result binary code to.
  * 
- * Returns: true if success, false otherwise.
+ * Returns: `true` if success, `false` otherwise.
  * 
  * Notes: 
  * - Assembly arguments are in format `Rd Rn CND`. 
- * - If returns `false`, caller should disregard `bincode` and check `g_aof_error_msg`.
+ * - If returns `false`, caller should disregard `bincode` and check `g_aofs_errormsg`.
 */
 bool aof_CND_tobinary(char *asmline, uint16_t* bincode);
 
