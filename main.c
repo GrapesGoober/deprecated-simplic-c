@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
     // unimplemented
     uint16_t bincode;
     char *my_asm = argv[2];
-    aof_CND_tobinary(my_asm, &bincode);
+    aof_REG_tobinary(my_asm, &bincode, 0);
     printf("Result: %x\n", bincode);
     printf("%s", g_aofs_errormsg);
 
