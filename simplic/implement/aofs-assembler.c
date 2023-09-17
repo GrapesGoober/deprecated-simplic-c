@@ -56,19 +56,7 @@ bool aof_REG_tobinary(char *reg_mnemonic, uint16_t* bincode){
 
 bool aof_CND_tobinary(char *asmline, uint16_t *bincode)
 {
-    // make a copy of asm line so that we can tokenize safely
-    char asmline_copy[strlen(asmline)];
-    strcpy(asmline_copy, asmline);
-
-    // firstly, read the instruction
-    // CND Instructions handle MOV and CNA instructions
-    char *instr = strtok(asmline_copy, " ");
-    if (strncmp(instr, "MOV", 3) == 0) *bincode = 0x0000;
-    else if (strncmp(instr, "CNA", 3) == 0) *bincode = 0x1000;
-    else {
-        aof_asm_fmterror(asmline, "CND parser expected either a MOV or CNA instruction");
-        return false;
-    }
-
-    return true;
+    
+    aof_asm_fmterror(asmline, "Unimplemented");
+    return false;
 }
