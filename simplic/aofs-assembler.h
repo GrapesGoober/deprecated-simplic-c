@@ -33,10 +33,10 @@ void aof_asm_fmterror(char *mnem, char *message);
 bool aof_ASM_tobinary(char *asmline, uint16_t *bincode);
 
 /** 
- * Parses a hexadecimal literal to binary code (with size restriction)
+ * Parses a literal to binary code (with size restriction)
  * Arguments:
- * - `char *hex_literal` Null terminated string containing 2 digits of hex.
- * - `uint8_t size` Restrict how big the value of hex literal be. Will return false if too large.
+ * - `char *literal` Null terminated string containing the literal.
+ * - `uint8_t size` Restrict how large the literal can represent.
  * - `uint16_t* bincode` The pointer to write the result binary code to.
  * 
  * Returns: `true` if success, `false` otherwise. 
@@ -45,7 +45,7 @@ bool aof_ASM_tobinary(char *asmline, uint16_t *bincode);
  * - The caller must do appropriate shift left to place the binary code at the right location
  * - If returns `false`, caller should disregard `bincode` and check `g_aofs_errormsg`.
 */
-bool aof_HEX_tobinary(char *hex_literal, uint8_t size, uint16_t *bincode);
+bool aof_literal_tobinary(char *literal, uint8_t size, uint16_t *bincode);
 
 /** 
  * Parses a register mnemonic to binary code
