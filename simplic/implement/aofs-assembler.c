@@ -12,6 +12,15 @@
 
 #include "../aofs-assembler.h"
 
+const char REG_TOKENS[16][3] = {
+    "ZR", "R1", "R2", "R3", "R4", "R5", // General Purpose Registers
+    "R6", "R7", "R8", "R9", "RA", "RB", 
+    "SP", // Stack Pointer (points to current top of stack)
+    "BR", // Buffer Register (for jumps, memory address, literal assignments etc)
+    "LR", // Link Register (PC's last location to return to, after finished a call)
+    "PC"  // Program Counter (points to the current instruction to read)
+};
+
 void aof_asm_fmterror(char *mnem, char *message){
     snprintf(g_aofs_errormsg, 256, "Assembly Syntax Error: '%s' - %s", mnem, message);
 }
@@ -50,18 +59,27 @@ bool aof_literal_tobinary(char *literal_tok, uint8_t size, uint16_t* bincode){
     return true;
 }
 
-bool aof_REG_tobinary(char *reg_tok, uint16_t* bincode, uint8_t shift){
+bool aof_asmline_tobinary(char *asmline, uint16_t *bincode)
+{
+    // tokenize string
+
+    // get instr token & bincode
+    // get rd
+
+    // switch case on each instr type, parse each token
+    //          if (aof_asmtok_tobinary( ... )) {
+    //              mybincode += bincode << ... ;
+    //          }
+    //          else aof_asm_fmterror(tok, ... );
+
+    return false;
+}
+
+bool aof_asmtok_tobinary(char *reg_tok, uint16_t* bincode, uint8_t shift){
     // this works by iteratively comparing string to an array of registers
     // to see if any of them match
 
-    char reg_cmp[16][3] = {
-        "ZR", "R1", "R2", "R3", "R4", "R5", // General Purpose Registers
-        "R6", "R7", "R8", "R9", "RA", "RB", 
-        "SP", // Stack Pointer (points to current top of stack)
-        "BR", // Buffer Register (for jumps, memory address, literal assignments etc)
-        "LR", // Link Register (PC's last location to return to, after finished a call)
-        "PC"  // Program Counter (points to the current instruction to read)
-    };
+    
     
     // get a capitalized copy of the input token
     // note: copy the null termination char too!
@@ -72,7 +90,7 @@ bool aof_REG_tobinary(char *reg_tok, uint16_t* bincode, uint8_t shift){
 
     // start looping to find match
     for (int reg_i = 0; reg_i < 16; reg_i++) {
-        if (strcmp(reg_tok_toupper, reg_cmp[reg_i]) == 0) {
+        if (strcmp(reg_tok_toupper, REG_TOKENS[reg_i]) == 0) {
             uint16_t reg_bincode = reg_i << shift;
             uint16_t bitmask = ~(0xf << shift);
             *bincode &= bitmask;
@@ -86,9 +104,3 @@ bool aof_REG_tobinary(char *reg_tok, uint16_t* bincode, uint8_t shift){
     return false;
 }
 
-bool aof_CND_tobinary(char *asmline, uint16_t *bincode)
-{
-    
-    aof_asm_fmterror(asmline, "Unimplemented");
-    return false;
-}
