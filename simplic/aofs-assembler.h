@@ -11,7 +11,7 @@
 /** 
  * A global variable that contains assembly syntax error and output error messages.
 */
-char g_aofs_errormsg[256];
+char g_aofs_errormsg[255];
 
 /** 
  * Formats an assembly error message to `g_aofs_errormsg`.
