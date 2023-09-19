@@ -25,39 +25,11 @@ void aof_asm_fmterror(char *token, char *message);
  * Parses an entire line of assembly instruction to binary. 
  * Arguments:
  * - `char *asmline` Null terminated string containing an input line of assembly.
- * - `uint16_t* bincode` The pointer to write the output binary code to.
  * 
- * Returns: `true` if success, `false` otherwise. 
- * Note: if returns `false`, caller should disregard `bincode` and check `g_aofs_errormsg`.
+ * Returns: Either a 16-bit binary code instruction if successful or `0xFFFF` for failure.
+ *
+ * Note: 
+ * - Error message will be put to `g_aofs_errormsg` upon error.
+ * - Instruction `NOR PC PC PC` is considered as invalid, and will be put to `g_aofs_errormsg`
 */
-bool aof_asmline_tobinary(char *asmline, uint16_t *bincode);
-
-/** 
- * Parses a literal token to binary code (with size restriction)
- * Arguments:
- * - `char *literal_tok` Null terminated string containing the literal.
- * - `uint8_t size` Restrict how large the literal can represent.
- * - `uint16_t* bincode` The pointer to write the result binary code to.
- * 
- * Returns: `true` if success, `false` otherwise. 
- * 
- * Notes:
- * - The caller must do appropriate shift left to place the binary code at the right location
- * - If returns `false`, caller should disregard `bincode` and check `g_aofs_errormsg`.
-*/
-bool aof_literal_tobinary(char *literal_tok, uint8_t size, uint16_t *bincode);
-
-/** 
- * Parses an assembly mnemonic token to binary code
- * Arguments:
- * - `char *asmtok` Null terminated string for the input assembly token.
- * - `uint16_t* bincode` The pointer to write the output binary code to.
- * - `uint8_t shift` The distance to left shift the result to.
- * 
- * Returns: `true` if success, `false` otherwise. 
- * 
- * Notes: 
- * - If returns `false`, caller should disregard `bincode` and check `g_aofs_errormsg`.
- * - Caller must do appropriate left shift.
-*/
-bool aof_asmtok_tobinary(char *asmtok, uint16_t* bincode, uint8_t shift);
+uint16_t aof_asmline_tobinary(char *asmline);
