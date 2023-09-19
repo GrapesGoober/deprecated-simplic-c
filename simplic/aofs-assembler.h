@@ -28,8 +28,20 @@ void aof_asm_fmterror(char *token, char *message);
  * 
  * Returns: Either a 16-bit binary code instruction if successful or `0xFFFF` for failure.
  *
- * Note: 
+ * Notes: 
  * - Error message will be put to `g_aofs_errormsg` upon error.
  * - Instruction `NOR PC PC PC` is considered as invalid, and will be put to `g_aofs_errormsg`
 */
 uint16_t aof_asmline_tobinary(char *asmline);
+
+/** 
+ * Parses an literal token to binary.
+ * Arguments:
+ * - `char *asmline` Null terminated string for input token.
+ * - `uint16_t` Literal size restriction. Maximum size is 256 or 1 byte.
+ * 
+ * Returns: Either the binary code value if successful or `0xFFFF` for failure.
+ *
+ * Note: Error message will be put to `g_aofs_errormsg` upon error.
+*/
+uint16_t aof_literal_tobinary(char *literal_tok, uint8_t size)
