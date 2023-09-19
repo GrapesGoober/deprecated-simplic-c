@@ -25,14 +25,14 @@ void aof_asm_fmterror(char *mnem, char *message){
     snprintf(g_aofs_errormsg, 256, "Assembly Syntax Error: '%s' - %s", mnem, message);
 }
 
-bool aof_literal_tobinary(char *literal_tok, uint8_t size, uint16_t* bincode){
+uint16_t aof_literal_tobinary(char *literal_tok, uint8_t size){
 
     // convert to int, while also handling invalid characters
     char *invalid_char;
     int converted_value = strtol(literal_tok, &invalid_char, 0);
     if (*invalid_char != '\0'){
         aof_asm_fmterror(literal_tok, "Invalid literal.");
-        return false;
+        return 0xFFFF;
     }
 
     // making sure that the input value is not too big
@@ -40,11 +40,11 @@ bool aof_literal_tobinary(char *literal_tok, uint8_t size, uint16_t* bincode){
         char fmt_errmsg[40];
         snprintf(fmt_errmsg, 40, "Literal value too large for size = %i", size);
         aof_asm_fmterror(literal_tok, fmt_errmsg);
-        return false;
+        return 0xFFFF;
     }
 
     // assign, but need to check for negative value
-    *bincode = (uint16_t)converted_value;
+    uint16_t bincode = (uint16_t)converted_value;
     
     // do appropriate shift-right shinanigans if this is a negative value
     // i.e. trying to replace left-side bits to zero
@@ -52,14 +52,14 @@ bool aof_literal_tobinary(char *literal_tok, uint8_t size, uint16_t* bincode){
     if (converted_value < 0) {
         for (int i = 1; *bincode > size; i++)
         {
-            *bincode <<= i;
-            *bincode >>= i;
+            bincode <<= i;
+            bincode >>= i;
         }
     }
-    return true;
+    return bincode;
 }
 
-bool aof_asmline_tobinary(char *asmline, uint16_t *bincode)
+uint16_t aof_asmline_tobinary(char *asmline)
 {
     // tokenize string
 
@@ -72,17 +72,15 @@ bool aof_asmline_tobinary(char *asmline, uint16_t *bincode)
     //          }
     //          else aof_asm_fmterror(tok, ... );
 
-    return false;
+    return 0xFFFF;
 }
 
-bool aof_asmtok_tobinary(char *reg_tok, uint16_t* bincode, uint8_t shift){
+uint16_t aof_asmtok_tobinary(char *asmtok, uint8_t shift){
     // this works by iteratively comparing string to an array of registers
     // to see if any of them match
-
     
-    
-    // get a capitalized copy of the input token
-    // note: copy the null termination char too!
+    // first, get a capitalized copy of the input token
+    // note: copy the null termination char too (hence + 1 size)
     char reg_tok_toupper[strlen(reg_tok) + 1];
     for (int char_i = 0; char_i < sizeof(reg_tok_toupper); char_i++) {
         reg_tok_toupper[char_i] = toupper(reg_tok[char_i]);
@@ -91,16 +89,13 @@ bool aof_asmtok_tobinary(char *reg_tok, uint16_t* bincode, uint8_t shift){
     // start looping to find match
     for (int reg_i = 0; reg_i < 16; reg_i++) {
         if (strcmp(reg_tok_toupper, REG_TOKENS[reg_i]) == 0) {
-            uint16_t reg_bincode = reg_i << shift;
-            uint16_t bitmask = ~(0xf << shift);
-            *bincode &= bitmask;
-            *bincode += reg_bincode;
-            return true;
+            // match found, return hex value with proper shift left
+            return (uint16_t)reg_i << shift;
         }
     }
 
     // is not found
-    aof_asm_fmterror(reg_tok, "Unrecognized register");
-    return false;
+    aof_asm_fmterror(reg_tok, "Unrecognized token");
+    return 0xFFFF;
 }
 
