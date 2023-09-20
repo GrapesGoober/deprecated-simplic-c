@@ -43,6 +43,12 @@ uint16_t aof_literal_tobinary(char *literal_tok, uint8_t size){
         return 0xFFFF;
     }
 
+	// NOTE ******
+    // for specific size AOF_TOK_IMM4 and AOF_TOK_IMM8
+    // could just do bitmask
+    // bincode &= 0x00FF
+    //    or      0x000F
+
     // assign, but need to check for negative value
     uint16_t bincode = (uint16_t)converted_value;
     
@@ -50,12 +56,7 @@ uint16_t aof_literal_tobinary(char *literal_tok, uint8_t size){
     // i.e. trying to replace left-side bits to zero
     // this essentially reducing down the 16 bit int onto the size appropriate for the "size"
     if (converted_value < 0) {
-        // NOTE ******
-        // for specific size AOF_TOK_IMM4 and AOF_TOK_IMM8
-        // could just simply
-        // bincode <<= 16-size
-        // bincode >>= 16-size
-        // or could even be a one-liner 
+        
         for (int i = 1; *bincode > size; i++)
         {
             bincode <<= i;
