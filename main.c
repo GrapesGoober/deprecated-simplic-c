@@ -27,9 +27,8 @@ int main(int argc, char* argv[]) {
 
     // start parsing the file
     // unimplemented
-    uint16_t bincode;
     char *my_asm = argv[2];
-    aof_regtok_tobinary(my_asm, &bincode, 0);
+    uint16_t bincode = aofs_mnemtok_tobinary(my_asm, AOFS_MNEMTOK_INSTR);
     printf("Result: %x\n", bincode);
     printf("%s", g_aofs_errormsg);
 

@@ -2,7 +2,7 @@
  * Simplic Compiler 2023, Nachat Kaewmeesang
  * aofs-assembler.h is the implementation file for the simplic assembler. It contains parsers that
  * converts simplic assembly instructions (in string) into binary code (in uint16_t). 
- * All functions of simplic assembler is prefixed with aof_ for clarity.
+ * All functions of simplic assembler is prefixed with aofs_ for clarity.
 */
 
 #include <stdio.h>
@@ -12,78 +12,11 @@
 
 #include "../aofs-assembler.h"
 
-// Register tokens
-const char REG_TOKENS[16][3] = {
-    "ZR", "R1", "R2", "R3", "R4", "R5", // General Purpose Registers
-    "R6", "R7", "R8", "R9", "RA", "RB", 
-    "SP", // Stack Pointer (points to current top of stack)
-    "BR", // Buffer Register (for jumps, memory address, literal assignments etc)
-    "LR", // Link Register (PC's last location to return to, after finished a call)
-    "PC"  // Program Counter (points to the current instruction to read)
-};
-
-// Conditional tokens used by MOV and CNA
-const char CND_TOKENS[16][3] = {
-    // Set & Clear status for each flags
-    "ZS", "ZC", // Zero Flag for equality comparison
-    "CS", "CC", // Carry Flag, for handling arithmatics
-    "NS", "NC", // Negative Flag for more than & less than comparison
-    "VS", "VC", // Overflow flag for handling nasty arithmatics
-    // General comparison useful for branches
-    "SM", "HI", // Smaller & Higher, for unsigned, use with SUB
-    "LT", "GT", // Lesser & Greater, for signed, use with SUB
-    "LE", "GE", // LT & GT or Equal
-    "FC", // Flag Clear
-    // And of course...
-    "AL" // Always, does not bother with flags
-};
-
-void aof_asm_fmterror(char *mnem, char *message){
+void aofs_asm_fmterror(char *mnem, char *message){
     snprintf(g_aofs_errormsg, 256, "Assembly Syntax Error: '%s' - %s", mnem, message);
 }
 
-uint16_t aof_literal_tobinary(char *literal_tok, uint8_t size){
-
-    // convert to int, while also handling invalid characters
-    char *invalid_char;
-    int converted_value = strtol(literal_tok, &invalid_char, 0);
-    if (*invalid_char != '\0'){
-        aof_asm_fmterror(literal_tok, "Invalid literal.");
-        return 0xFFFF;
-    }
-
-    // making sure that the input value is not too big
-    if (abs(converted_value) > size) {
-        char fmt_errmsg[40];
-        snprintf(fmt_errmsg, 40, "Literal value too large for size = %i", size);
-        aof_asm_fmterror(literal_tok, fmt_errmsg);
-        return 0xFFFF;
-    }
-
-	// NOTE ******
-    // for specific size AOF_TOK_IMM4 and AOF_TOK_IMM8
-    // could just do bitmask
-    // bincode &= 0x00FF
-    //    or      0x000F
-
-    // assign, but need to check for negative value
-    uint16_t bincode = (uint16_t)converted_value;
-    
-    // do appropriate shift-right shinanigans if this is a negative value
-    // i.e. trying to replace left-side bits to zero
-    // this essentially reducing down the 16 bit int onto the size appropriate for the "size"
-    if (converted_value < 0) {
-        
-        for (int i = 1; *bincode > size; i++)
-        {
-            bincode <<= i;
-            bincode >>= i;
-        }
-    }
-    return bincode;
-}
-
-uint16_t aof_asmline_tobinary(char *asmline)
+uint16_t aofs_asmline_tobinary(char *asmline)
 {
     // tokenize string
 
@@ -91,35 +24,113 @@ uint16_t aof_asmline_tobinary(char *asmline)
     // get rd
 
     // switch case on each instr type, parse each token
-    //          if (aof_asmtok_tobinary( ... )) {
+    //          if (aofs_mnemtok_tobinary( ... )) {
     //              mybincode += bincode << ... ;
     //          }
-    //          else aof_asm_fmterror(tok, ... );
+    //          else aofs_asm_fmterror(tok, ... );
 
     return 0xFFFF;
 }
 
-uint16_t aof_asmtok_tobinary(char *asmtok, uint8_t shift){
-    // this works by iteratively comparing string to an array of registers
-    // to see if any of them match
+uint16_t aofs_immtok_tobinary(char *immtok, enum aofs_asmtok_type type){
+    // Parse immediate value using strtol and some bitmasking
+
+    // firstly: strtol to int and handle invalid characters
+    char *invalid_char;
+    int number = strtol(immtok, &invalid_char, 0);
+
+    // handle invalid character issues
+    if (*invalid_char != '\0'){
+        aofs_asm_fmterror(immtok, "Invalid literal.");
+        return 0xFFFF;
+    }
     
+    // check size, do bitmask, and return value
+    if (type == AOFS_IMMTOK_IMM4) {
+        if (abs(number) > 15) aofs_asm_fmterror(immtok, "Literal too large for 4 bits.");
+        return (uint16_t)number & 0xF;
+    }
+    if (type == AOFS_IMMTOK_IMM8) {
+        if (abs(number) > 255) aofs_asm_fmterror(immtok, "Literal too large for 8 bits.");
+        return (uint16_t)number & 0xFF;
+    }
+
+    // handle bad enum type input (although it should not happen anyways)
+    aofs_asm_fmterror("BAD CALL", "Undefined immediate token type");
+    return 0xFFFF;
+}
+
+uint16_t aofs_mnemtok_tobinary(char *mnemtok, enum aofs_asmtok_type type){
+    // Parse assembly mnemonic by comparing to a mnemonic set
+
     // first, get a capitalized copy of the input token
     // note: copy the null termination char too (hence + 1 size)
-    char reg_tok_toupper[strlen(reg_tok) + 1];
-    for (int char_i = 0; char_i < sizeof(reg_tok_toupper); char_i++) {
-        reg_tok_toupper[char_i] = toupper(reg_tok[char_i]);
+    char mnemtok_copy[strlen(mnemtok) + 1];
+    for (int char_i = 0; char_i < sizeof(mnemtok_copy); char_i++) {
+        mnemtok_copy[char_i] = toupper(mnemtok[char_i]);
     }
 
-    // start looping to find match
-    for (int reg_i = 0; reg_i < 16; reg_i++) {
-        if (strcmp(reg_tok_toupper, REG_TOKENS[reg_i]) == 0) {
-            // match found, return hex value with proper shift left
-            return (uint16_t)reg_i << shift;
-        }
-    }
+    // select the appropriate set of tokens to compare this to
+    // note that aofs_get_mnemset will handle undefined aofs_asmtok_type itself
+    const char *mnemset;
+    int mnemset_size = aofs_get_mnemset(&mnemset, type);
+    if (mnemset_size == -1) return 0xFFFF;
 
+    // // start looping to find match
+    // for (int i = 0; i < mnemset_size; i++) {
+        
+    //     printf("%s ", mnemset);
+
+    //     if (strcmp(mnemtok_copy, mnemset) == 0) {
+    //         // match found, return hex value (do shifting for register values)
+    //         if (type == AOFS_MNEMTOK_RD) 
+    //             return (uint16_t)i << 8;
+    //         else if (type == AOFS_MNEMTOK_RN) 
+    //             return (uint16_t)i << 4;
+    //         else 
+    //             return (uint16_t)i;
+    //     }
+    // }
+    
     // is not found
-    aof_asm_fmterror(reg_tok, "Unrecognized token");
+    aofs_asm_fmterror(mnemtok, "Unrecognized token");
     return 0xFFFF;
 }
 
+int aofs_get_mnemset(const char **mnemset, enum aofs_asmtok_type type)
+{
+    // Instruction mnemonic tokens set
+    static const char AOFS_MNEMSET_INSTR[16][4] = {
+        "MOV", "CNA", "LDR", "STR", "MVS", "SFT", "ADD", "SUB",
+        "MUL", "LML", "DIV", "MOD", "AND", "ORR", "XOR", "NOR"
+    };
+    // Register mnemonic tokens set
+    static const char AOFS_MNEMSET_REG[16][3] = {
+        "ZR", "R1", "R2", "R3", "R4", "R5", "R6", "R7", 
+        "R8", "R9", "RA", "RB", "SP", "BR", "LR", "PC" 
+    };
+    // Conditional mnemonic tokens set used by MOV and CNA
+    static const char AOFS_MNEMSET_CND[16][4] = {
+        "ZS", "ZC", "CS", "CC", "NS", "NC", "VS", "VC",
+        "SM", "HI", "LT", "GT", "LE", "GE", "FC", "AL"
+    };
+    // Shift Opertation tokens set used by SFT instruction
+    static const char AOFS_MNEMSET_SOP[4][4] = {
+        "LSL", "LSR", "ASR", "ROR"
+    };
+
+    switch (type) {
+        case AOFS_MNEMTOK_INSTR: 
+            *mnemset = (const char *)AOFS_MNEMSET_INSTR; return 16;
+        case AOFS_MNEMTOK_RD: case AOFS_MNEMTOK_RN: case AOFS_MNEMTOK_RM: 
+            *mnemset = (const char *)AOFS_MNEMSET_REG;  return 16;
+        case AOFS_MNEMTOK_CND:
+            *mnemset = (const char *)AOFS_MNEMSET_CND; return 16;
+        case AOFS_MNEMTOK_SOP:
+            *mnemset = (const char *)AOFS_MNEMSET_SOP; return 4;
+        // Handle invalid enum... should not happen anyways
+        default:
+            aofs_asm_fmterror("BAD CALL", "Undefined mnemonic token type.");
+            return -1;
+    }
+}
