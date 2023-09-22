@@ -52,7 +52,7 @@ uint16_t aofs_asmline_tobinary(char *asmline);
 /** 
  * Gets an appropriate set of mnemonic tokens. Used by `aofs_mnemtok_tobinary` parser.
  * Arguments:
- * - `char **mnemset` Pointer to output token set. Token is a null-delimited string.
+ * - `char **mnemset` Pointer to output mnemonic set as a null-delimited string.
  * - `enum aofs_asmtok_type type` Type of mnemonic set. Enum members are prefixed with `AOFS_MNEMTOK`.
  * 
  * Returns `int`, either 
