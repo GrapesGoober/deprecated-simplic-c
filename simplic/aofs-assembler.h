@@ -68,7 +68,7 @@ int aofs_get_mnemset(const char **mnemset, enum aofs_asmtok_type type);
  * Parses an assembly mnemonic token to binary.
  * Arguments:
  * - `char *mnemtok` Null terminated string for input token.
- * - `enum aofs_asmtok_type type` Type of token to parse. Enum members are prefixed with `AOFS_IMMTOK`.
+ * - `enum aofs_asmtok_type type` Type of token to parse. Enum members are prefixed with `AOFS_MNEMTOK`.
  * 
  * Returns `uint16_t`, either 
  * - Binary code equivalence, if successful,
