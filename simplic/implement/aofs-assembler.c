@@ -77,6 +77,13 @@ uint16_t aofs_mnemtok_tobinary(char *mnemtok, enum aofs_asmtok_type type){
     if (mnemset_size == -1) return 0xFFFF;
 
     // // start looping to find match
+    printf("\nIterating: \n");
+    for (int i = 0; i < mnemset_size; i++){
+        printf("Item: %s\n", mnemset);
+        while(mnemset[0] != '\0') mnemset++;
+        mnemset++;
+    }
+    
     // for (int i = 0; i < mnemset_size; i++) {
         
     //     printf("%s ", mnemset);
@@ -100,34 +107,30 @@ uint16_t aofs_mnemtok_tobinary(char *mnemtok, enum aofs_asmtok_type type){
 int aofs_get_mnemset(const char **mnemset, enum aofs_asmtok_type type)
 {
     // Instruction mnemonic tokens set
-    static const char AOFS_MNEMSET_INSTR[16][4] = {
-        "MOV", "CNA", "LDR", "STR", "MVS", "SFT", "ADD", "SUB",
-        "MUL", "LML", "DIV", "MOD", "AND", "ORR", "XOR", "NOR"
-    };
+    static const char *instructions_set = 
+        "MOV\0CNA\0LDR\0STR\0MVS\0SFT\0ADD\0SUB\0"
+        "MUL\0LML\0DIV\0MOD\0AND\0ORR\0XOR\0NOR\0";
     // Register mnemonic tokens set
-    static const char AOFS_MNEMSET_REG[16][3] = {
-        "ZR", "R1", "R2", "R3", "R4", "R5", "R6", "R7", 
-        "R8", "R9", "RA", "RB", "SP", "BR", "LR", "PC" 
-    };
+    static const char *registers_set = 
+        "ZR\0R1\0R2\0R3\0R4\0R5\0R6\0R7\0"
+        "R8\0R9\0RA\0RB\0SP\0BR\0LR\0PC\0";
     // Conditional mnemonic tokens set used by MOV and CNA
-    static const char AOFS_MNEMSET_CND[16][4] = {
-        "ZS", "ZC", "CS", "CC", "NS", "NC", "VS", "VC",
-        "SM", "HI", "LT", "GT", "LE", "GE", "FC", "AL"
-    };
+    static const char *conditionals_set = 
+        "ZS\0ZC\0CS\0CC\0NS\0NC\0VS\0VC\0"
+        "SM\0HI\0LT\0GT\0LE\0GE\0FC\0AL\0";
     // Shift Opertation tokens set used by SFT instruction
-    static const char AOFS_MNEMSET_SOP[4][4] = {
-        "LSL", "LSR", "ASR", "ROR"
-    };
+    static const char *shiftop_set =
+        "LSL\0LSR\0ASR\0ROR\0";
 
     switch (type) {
         case AOFS_MNEMTOK_INSTR: 
-            *mnemset = (const char *)AOFS_MNEMSET_INSTR; return 16;
+            *mnemset = AOFS_MNEMSET_INSTR; return 16;
         case AOFS_MNEMTOK_RD: case AOFS_MNEMTOK_RN: case AOFS_MNEMTOK_RM: 
-            *mnemset = (const char *)AOFS_MNEMSET_REG;  return 16;
+            *mnemset = AOFS_MNEMSET_REG;  return 16;
         case AOFS_MNEMTOK_CND:
-            *mnemset = (const char *)AOFS_MNEMSET_CND; return 16;
+            *mnemset = AOFS_MNEMSET_CND; return 16;
         case AOFS_MNEMTOK_SOP:
-            *mnemset = (const char *)AOFS_MNEMSET_SOP; return 4;
+            *mnemset = AOFS_MNEMSET_SOP; return 4;
         // Handle invalid enum... should not happen anyways
         default:
             aofs_asm_fmterror("BAD CALL", "Undefined mnemonic token type.");
