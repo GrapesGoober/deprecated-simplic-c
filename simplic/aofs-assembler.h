@@ -2,7 +2,7 @@
  * Simplic Compiler 2023, Nachat Kaewmeesang
  * aofs-assembler.h is the header file for the simplic assembler. It contains parsers that
  * converts simplic assembly instructions (in string) into binary code (in uint16_t). 
- * All assembly parser functions are prefixed with aof_ for clarity.
+ * All assembly parser functions are prefixed with aofs_ for clarity.
 */
 
 #include <stdint.h>
@@ -11,7 +11,19 @@
 /** 
  * A global variable that contains assembly syntax error and output error messages.
 */
-char g_aofs_errormsg[256];
+char g_aofs_errormsg[255];
+
+/** 
+ * Enum type to tell the function `aofs_mnemtok_tobinary` and `aofs_immtok_tobinary` what mnemonic type to parse
+*/
+enum aofs_asmtok_type {
+    AOFS_IMMTOK_IMM4, AOFS_IMMTOK_IMM8, // Immediate-Value tokens of either 8-bits or 4-bits
+    AOFS_MNEMTOK_INSTR, // Instruction token
+    AOFS_MNEMTOK_RD, AOFS_MNEMTOK_RN, AOFS_MNEMTOK_RM, // Register token with various positions
+    AOFS_MNEMTOK_CND, // Condition token used for MOVs and CNAs
+    AOFS_MNEMTOK_SOP, // Shift Operation token used by SFTs
+};
+
 
 /** 
  * Formats an assembly error message to `g_aofs_errormsg`.
@@ -19,63 +31,65 @@ char g_aofs_errormsg[256];
  * - `char *token` Null terminated string containing the token of the problem.
  * - `char *message` Null terminated string containing the message.
 */
-void aof_asm_fmterror(char *token, char *message);
+void aofs_asm_fmterror(char *token, char *message);
 
 /** 
  * Parses an entire line of assembly instruction to binary. 
  * Arguments:
- * - `char *asmline` Null terminated string containing a line of assembly.
- * - `uint16_t* bincode` The pointer to write the result binary code to.
+ * - `char *asmline` Null terminated string containing an input line of assembly.
  * 
- * Returns: `true` if success, `false` otherwise. 
- * Note: if returns `false`, the error messages can be found in `g_aofs_errormsg`.
+ * Returns `uint16_t`, either 
+ * - Binary code instruction, if successful,
+ * - or `0xFFFF` value, if failure.
+ *
+ * Notes: 
+ * - Error message will be put to `g_aofs_errormsg` upon error.
+ * - Instruction `NOR PC PC PC` is reserved for error message.
+ *  It is considered invalid and will be put to `g_aofs_errormsg`
 */
-bool aof_ASM_tobinary(char *asmline, uint16_t *bincode);
+uint16_t aofs_asmline_tobinary(char *asmline);
 
 /** 
- * Parses a literal token to binary code (with size restriction)
+ * Gets an appropriate set of mnemonic tokens. Used by `aofs_mnemtok_tobinary` parser.
  * Arguments:
- * - `char *literal_tok` Null terminated string containing the literal.
- * - `uint8_t size` Restrict how large the literal can represent.
- * - `uint16_t* bincode` The pointer to write the result binary code to.
+ * - `char **mnemset` Pointer to output mnemonic set as a null-delimited string.
+ * - `enum aofs_asmtok_type type` Type of mnemonic set. Enum members are prefixed with `AOFS_MNEMTOK`.
  * 
- * Returns: `true` if success, `false` otherwise. 
- * 
- * Notes:
- * - The caller must do appropriate shift left to place the binary code at the right location
- * - If returns `false`, caller should disregard `bincode` and check `g_aofs_errormsg`.
+ * Returns `int`, either 
+ * - `> 0` for the size of the set
+ * - or `-1` value, for failure.
+ *
+ * Notes: 
+ * - Error message will be put to `g_aofs_errormsg` upon error.
 */
-bool aof_literal_tobinary(char *literal_tok, uint8_t size, uint16_t *bincode);
+int aofs_get_mnemset(const char **mnemset, enum aofs_asmtok_type type);
 
 /** 
- * Parses a register mnemonic to binary code
+ * Parses an assembly mnemonic token to binary.
  * Arguments:
- * - `char *reg_tok` Null terminated string containing 2 digits of register mnemonic.
- * - `uint16_t* bincode` The pointer to write the result binary code to.
- * - `uint8_t shift` The distance to left shift to.
+ * - `char *mnemtok` Null terminated string for input token.
+ * - `enum aofs_asmtok_type type` Type of token to parse. Enum members are prefixed with `AOFS_MNEMTOK`.
  * 
- * Returns: `true` if success, `false` otherwise. 
- * 
- * Note: if returns `false`, caller should disregard `bincode` and check `g_aofs_errormsg`.
+ * Returns `uint16_t`, either 
+ * - Binary code equivalence, if successful,
+ * - or `0xFFFF` value, if failure.
+ *
+ * Note: Error message will be put to `g_aofs_errormsg` upon failure.
 */
-bool aof_REG_tobinary(char *reg_tok, uint16_t* bincode, uint8_t shift);
+uint16_t aofs_mnemtok_tobinary(char *mnemtok, enum aofs_asmtok_type type);
 
 /** 
- * Parses conditional assembly instructions (`MOV` or `CNA`) to binary code.
+ * Parses an assembly immediate-value token to binary.
  * Arguments:
- * - `char *asmline` Null terminated string containing a line of assembly.
- * - `uint16_t* bincode` The pointer to write the result binary code to.
+ * - `char *immtok` Null terminated string for input token.
+ * - `enum aofs_asmtok_type type` Type of immediate token to parse,
+ *  either `AOFS_IMMTOK_IMM4` or `AOFS_IMMTOK_IMM8` are allowed
  * 
- * Returns: `true` if success, `false` otherwise.
- * 
- * Notes:
- * - The assembly arguments are `Rd Rn CND`.
- * - If returns `false`, caller should disregard `bincode` and check `g_aofs_errormsg`.
+ * Returns `uint16_t`, either 
+ * - Binary code equivalence, if successful,
+ * - or `0xFFFF` value, if failure.
+ *
+ * Note: Error message will be put to `g_aofs_errormsg` upon failure.
 */
-bool aof_CND_tobinary(char *asmline, uint16_t* bincode);
+uint16_t aofs_immtok_tobinary(char *immtok, enum aofs_asmtok_type type);
 
-bool aof_MEM__tobinary(char *asmline, uint16_t* bincode);
-
-bool aof_SFT__tobinary(char *asmline, uint16_t* bincode);
-
-bool aof_ALU__tobinary(char *asmline, uint16_t* bincode);
