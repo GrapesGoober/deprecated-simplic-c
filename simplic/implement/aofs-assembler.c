@@ -77,27 +77,20 @@ uint16_t aofs_mnemtok_tobinary(char *mnemtok, enum aofs_asmtok_type type){
     if (mnemset_size == -1) return 0xFFFF;
 
     // // start looping to find match
-    printf("\nIterating: \n");
     for (int i = 0; i < mnemset_size; i++){
-        printf("Item: %s\n", mnemset);
+        if (strcmp(mnemtok_copy, mnemset) == 0) {
+            // match found, return hex value (do shifting for register values)
+            if (type == AOFS_MNEMTOK_RD) 
+                return (uint16_t)i << 8;
+            else if (type == AOFS_MNEMTOK_RN) 
+                return (uint16_t)i << 4;
+            else 
+                return (uint16_t)i;
+        }
+
         while(mnemset[0] != '\0') mnemset++;
         mnemset++;
     }
-    
-    // for (int i = 0; i < mnemset_size; i++) {
-        
-    //     printf("%s ", mnemset);
-
-    //     if (strcmp(mnemtok_copy, mnemset) == 0) {
-    //         // match found, return hex value (do shifting for register values)
-    //         if (type == AOFS_MNEMTOK_RD) 
-    //             return (uint16_t)i << 8;
-    //         else if (type == AOFS_MNEMTOK_RN) 
-    //             return (uint16_t)i << 4;
-    //         else 
-    //             return (uint16_t)i;
-    //     }
-    // }
     
     // is not found
     aofs_asm_fmterror(mnemtok, "Unrecognized token");
@@ -124,13 +117,13 @@ int aofs_get_mnemset(const char **mnemset, enum aofs_asmtok_type type)
 
     switch (type) {
         case AOFS_MNEMTOK_INSTR: 
-            *mnemset = AOFS_MNEMSET_INSTR; return 16;
+            *mnemset = instructions_set; return 16;
         case AOFS_MNEMTOK_RD: case AOFS_MNEMTOK_RN: case AOFS_MNEMTOK_RM: 
-            *mnemset = AOFS_MNEMSET_REG;  return 16;
+            *mnemset = registers_set;  return 16;
         case AOFS_MNEMTOK_CND:
-            *mnemset = AOFS_MNEMSET_CND; return 16;
+            *mnemset = conditionals_set; return 16;
         case AOFS_MNEMTOK_SOP:
-            *mnemset = AOFS_MNEMSET_SOP; return 4;
+            *mnemset = shiftop_set; return 4;
         // Handle invalid enum... should not happen anyways
         default:
             aofs_asm_fmterror("BAD CALL", "Undefined mnemonic token type.");
