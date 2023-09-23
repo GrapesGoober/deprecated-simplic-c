@@ -63,7 +63,7 @@ uint16_t aofs_immtok_tobinary(char *immtok, enum aofs_asmtok_type type){
 uint16_t aofs_mnemtok_tobinary(char *mnemtok, enum aofs_asmtok_type type){
     // Parse assembly mnemonic by comparing to a mnemonic set
 
-    // first, get a capitalized copy of the input token
+    // get a capitalized copy of the input token
     // note: copy the null termination char too (hence + 1 size)
     char mnemtok_copy[strlen(mnemtok) + 1];
     for (int char_i = 0; char_i < sizeof(mnemtok_copy); char_i++) {
@@ -76,10 +76,10 @@ uint16_t aofs_mnemtok_tobinary(char *mnemtok, enum aofs_asmtok_type type){
     int mnemset_size = aofs_get_mnemset(&mnemset, type);
     if (mnemset_size == -1) return 0xFFFF;
 
-    // // start looping to find match
+    // start looping to find match
     for (int i = 0; i < mnemset_size; i++){
         if (strcmp(mnemtok_copy, mnemset) == 0) {
-            // match found, return hex value (do shifting for register values)
+            // match found, return bincodes (do shifting in case of register)
             if (type == AOFS_MNEMTOK_RD) 
                 return (uint16_t)i << 8;
             else if (type == AOFS_MNEMTOK_RN) 
@@ -99,6 +99,8 @@ uint16_t aofs_mnemtok_tobinary(char *mnemtok, enum aofs_asmtok_type type){
 
 int aofs_get_mnemset(const char **mnemset, enum aofs_asmtok_type type)
 {
+    // switch-case for each aofs_asmtok_type, then return the correct string
+
     // Instruction mnemonic tokens set
     static const char *instructions_set = 
         "MOV\0CNA\0LDR\0STR\0MVS\0SFT\0ADD\0SUB\0"
@@ -114,6 +116,9 @@ int aofs_get_mnemset(const char **mnemset, enum aofs_asmtok_type type)
     // Shift Opertation tokens set used by SFT instruction
     static const char *shiftop_set =
         "LSL\0LSR\0ASR\0ROR\0";
+
+        // imm-lsl imm-lsr imm-asl imm-asr imm-rol imm-ror
+        // reg-lsl reg-lsr reg-asl reg-asr reg-rol reg-ror
 
     switch (type) {
         case AOFS_MNEMTOK_INSTR: 
