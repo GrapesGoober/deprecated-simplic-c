@@ -28,9 +28,7 @@ int main(int argc, char* argv[]) {
     // start parsing the file
     // unimplemented
     char *my_asm = argv[2];
-    uint16_t bincode = aofs_mnemtok_tobinary(my_asm, AOFS_MNEMTOK_RD);
-    printf("Result: %x\n", bincode);
-    printf("%s", g_aofs_errormsg);
+    aofs_asmline_tobinary(my_asm);
 
     // write to hex file
     // unimplemented
